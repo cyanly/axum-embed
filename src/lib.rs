@@ -250,7 +250,8 @@ impl<E: RustEmbed, T> ServeFuture<E, T> {
         path: &'a str,
         acceptable_encoding: &[CompressionMethod],
     ) -> GetFileResult<'a> {
-        let mut path_candidate = Cow::Borrowed(path.trim_start_matches('/'));
+        let path_without_query = path.split('?').next().unwrap_or("");
+        let mut path_candidate = Cow::Borrowed(path_without_query.trim_start_matches('/'));
 
         if path_candidate == "" {
             if let Some(index_file) = self.index_file.as_ref() {
@@ -274,6 +275,11 @@ impl<E: RustEmbed, T> ServeFuture<E, T> {
                         compression_method: CompressionMethod::Identity,
                         is_fallback: false,
                     };
+                }
+            } else {
+                let html_candidate = format!("{}.html", path_candidate);
+                if E::get(&html_candidate).is_some() {
+                    path_candidate = Cow::Owned(html_candidate);
                 }
             }
         }
