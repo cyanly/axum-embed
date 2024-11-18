@@ -275,13 +275,13 @@ impl<E: RustEmbed, T> ServeFuture<E, T> {
                         compression_method: CompressionMethod::Identity,
                         is_fallback: false,
                     };
+                } else {
+                    let html_candidate = format!("{}.html", path_candidate);
+                    if E::get(&html_candidate).is_some() {
+                        path_candidate = Cow::Owned(html_candidate);
+                    }
                 }
-            } else {
-                let html_candidate = format!("{}.html", path_candidate);
-                if E::get(&html_candidate).is_some() {
-                    path_candidate = Cow::Owned(html_candidate);
-                }
-            }
+            } 
         }
 
         let mut file = E::get(&path_candidate);
